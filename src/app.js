@@ -3,9 +3,16 @@ const express = require('express');
 const morgan = require('morgan');
 const { json, urlencoded } = require('body-parser');
 
-// modules
-const productRoutes = require('./api/routes/product');
-const orderRoutes = require('./api/routes/orders');
+// custom middleware
+const enableCors = require('./middleware/corsMiddleware');
+const connectToDb = require('./utils/connectDB');
+
+// routes
+const productRoutes = require('./api/resources/products/product.router');
+const orderRoutes = require('./api/resources/orders/orders.router');
+
+// connect to the database
+connectToDb();
 
 // create express app
 const app = express();
@@ -14,20 +21,7 @@ const app = express();
 app.use(morgan('dev'));
 app.use(urlencoded({ extended: true }));
 app.use(json());
-
-// CORS
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Types, Accept, Authorization'
-  );
-  if (req.method === 'OPTIONS') {
-    res.header('Access-Control-Allow-Methods', 'PUT, POST, PATCH, DELETE, GET');
-    return res.status(200).json({});
-  }
-  next();
-});
+app.use(enableCors);
 
 // Routes for handling requests
 app.use('/products', productRoutes);
