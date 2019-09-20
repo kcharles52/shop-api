@@ -1,39 +1,33 @@
 const express = require('express');
 
+// helper functions
+const {
+  validateOrderID,
+} = require('../../../middleware/routeMiddleware/paramValidation');
+
+// Orders router
 const router = express.Router();
 
-router.get('/', (req, res, next) => {
-  res.status(200).json({
-    message: 'Orders returned',
-  });
-});
+// controllers
+const {
+  createOrder,
+  getOrders,
+  getSingleOrder,
+  updatedSingleOrder,
+  deleteSpecificOrder,
+} = require('./orders.controller');
 
-router.post('/', (req, res, next) => {
-  res.status(201).json({
-    message: 'Ordercreated',
-  });
-});
+router
+  .route('/')
+  .get(getOrders)
+  .post(createOrder);
 
-router.get('/:orderID', (req, res, next) => {
-  res.status(200).json({
-    message: 'Order details',
-    orderId: req.params.orderID
-  });
-  
-});
+router.param('orderID', validateOrderID);
 
-router.patch('/:orderID', (req, res, next) => {
-  res.status(200).json({
-    message: 'Order updated',
-    orderId: req.params.orderID
-  });
-});
-
-router.delete('/:orderID', (req, res, next) => {
-  res.status(200).json({
-    message: 'order deleted',
-    orderId: req.params.orderID
-  });
-});
+router
+  .route('/:orderID')
+  .get(getSingleOrder)
+  .patch(updatedSingleOrder)
+  .delete(deleteSpecificOrder);
 
 module.exports = router;
