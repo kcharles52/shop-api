@@ -5,8 +5,23 @@ const Product = require('./product.model');
 
 const getAllProducts = (req, res, next) => {
   return Product.find()
+    .select('name price _id')
     .then((docs) => {
-      res.status(200).json(docs);
+      const response = {
+        count: docs.length,
+        products: docs.map((doc) => {
+          return {
+            ...doc._doc,
+            metaData: {
+              request: {
+                type: 'GET',
+                url: `http://${req.headers.host}/products/${doc._id}`,
+              },
+            },
+          };
+        }),
+      };
+      res.status(200).json(response);
     })
     .catch((err) => {
       res.status(500).json({
@@ -27,7 +42,7 @@ const createProduct = (req, res, next) => {
     .save()
     .then((result) => {
       res.status(200).json({
-        message: 'Product successfully save',
+        message: 'Product successfully saved',
         product: result,
       });
     })
@@ -64,7 +79,6 @@ const updateProduct = (req, res, next) => {
     const updateParams = {};
 
     for (const ops of req.body) {
-      console.log(ops);
       updateParams[ops.propName] = ops.value;
     }
 
